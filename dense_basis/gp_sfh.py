@@ -13,14 +13,19 @@ import scipy.io as sio
 
 from .priors import *
 
-import pkg_resources
+try:
+    import pkg_resources
+except ImportError:
+    pkg_resources = None
+    import importlib.resources as resources
 
 
 def get_file(folder, filename):
     resource_package = __name__
     resource_path = "/".join((folder, filename))  # Do not use os.path.join()
-    template = pkg_resources.resource_stream(resource_package, resource_path)
-    return template
+    if pkg_resources is not None:
+        return pkg_resources.resource_stream(resource_package, resource_path)
+    return resources.files(resource_package).joinpath(resource_path).open("rb")
 
 
 fsps_mlc = sio.loadmat(get_file("train_data", "fsps_mass_loss_curve.mat"))

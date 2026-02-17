@@ -2,7 +2,12 @@ import numpy as np
 from tqdm import tqdm
 import scipy.io as sio
 import os
-import pkg_resources
+
+try:
+    import pkg_resources
+except ImportError:
+    pkg_resources = None
+    import importlib.resources as resources
 import hickle
 
 # cosmology assumption
@@ -309,7 +314,12 @@ def make_filvalkit_simple(
     if filt_dir == "internal":
         resource_package = __name__
         resource_path = "/".join(("filters", fkit_name))  # Do not use os.path.join()
-        template = pkg_resources.resource_string(resource_package, resource_path)
+        if pkg_resources is not None:
+            template = pkg_resources.resource_string(resource_package, resource_path)
+        else:
+            template = (
+                resources.files(resource_package).joinpath(resource_path).read_bytes()
+            )
         f = template.split()
         temp = template.split()
     else:
